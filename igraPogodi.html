@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="sr">
+<head>
+	<title>Naslov</title>
+	<meta charset="UTF-8">
+	<style>
+		body{
+			font-size: 1.5rem;
+			margin: 0;
+			background-color: #53b34c;
+			text-align: center;
+		}
+		h1{
+			background-color: green;
+			color: lightblue;
+			padding: 2px;
+		}
+		button{
+			cursor: pointer;
+		}
+		input{
+			cursor: pointer;
+		}
+		#dugmici button{
+			font-size: 1.5rem;
+			height: 40px;
+			width: 60px;
+			margin: 0 5px;
+		}
+		#dugmici{
+			display: flex;
+			justify-content: center;
+		}
+		#tPrikaz{
+			height: 50px;
+			display: flex;
+			justify-content: center;
+		}
+		#tPrikaz>p{
+			width: 50px;
+			background-color: darkgreen;
+			color: lightblue;
+			display: inline-block;
+			margin: 0 5px;
+			font-size: 2.5rem;
+		}
+		#istorija p{
+			margin: 0;
+		}
+		#istorija>div{
+			display: flex;
+			justify-content: center;
+			margin-top: 5px;
+		}
+		#istorija>div>p{
+			flex-basis: 120px;
+			border-bottom: 1px solid green;
+			text-align: center;
+		}
+		#istorija>div>p:nth-of-type(2n+1){
+			margin-right: 5px;
+		}
+		#istorija>div>p:nth-of-type(2n){
+			margin-left: 5px;
+		}
+		.okvir{
+			border: 1.5px solid transparent;
+		}
+		.crveni{
+			height: 30px;
+			width: 30px;
+			border-radius: 50%;
+			background-color: red;
+			display: inline-block;
+		}
+		.zuti{
+			height: 30px;
+			width: 30px;
+			border-radius: 50%;
+			background-color: yellow;
+			display: inline-block;
+		}
+		.sivi{
+			height: 30px;
+			width: 30px;
+			border-radius: 50%;
+			background-color: lightgrey;
+			display: inline-block;
+		}
+		.selekt{
+			border-color: lightblue;
+		}
+		.skriven{
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<h1>Погоди комбинацију</h1>
+	<div id="glavni" class="skriven">
+		<p id="dugmici">
+			<button onclick="dodajSimbol(0)">&star;</button>
+			<button onclick="dodajSimbol(1)">&spades;</button>
+			<button onclick="dodajSimbol(2)">&clubs;</button>
+			<button onclick="dodajSimbol(3)">&hearts;</button>
+			<button onclick="dodajSimbol(4)">&diams;</button>
+			<button onclick="dodajSimbol(5)">A</button>
+		</p>
+		<p><button onclick="proveriKomb()">Провери</button></p>
+		<div id="tPrikaz">
+			<p class='okvir selekt'></p>
+			<p class='okvir'></p>
+			<p class='okvir'></p>
+			<p class='okvir'></p>
+		</div>
+		<p id="istorija"></p>
+		<p id="konzola"></p>
+	</div>
+	<div id="sporedni">
+		<p>Изабери тежину:</p>
+		<p><input type="radio" name="tezina" value="10">ЛАКО (Број покушаја: 10)</p>
+		<p><input type="radio" name="tezina" value="7" checked>ПРОСЕЧНО (Број покушаја: 7)</p>
+		<p><input type="radio" name="tezina" value="4">ТЕШКО (Број покушаја: 4)</p>
+		<p><button onclick="startGame()">Започни игру</button></p>
+	</div>
+	<script>
+		var izabranaKomb=[7,7,7,7];
+		var brojacDodavanja=0;
+		var prikaz=["&star;","&spades;","&clubs;","&hearts;","&diams;","A"];
+		var randomKomb=[];
+		var kraj=false;
+		var pokusaji=10;
+		
+		for(var i=0; i<4; i++){
+			randomKomb[i]=Math.floor(Math.random()*6);
+		}
+
+		function startGame(){
+			var tezina=document.getElementsByName('tezina');
+			for(var i=0; i<tezina.length; i++){
+				if(tezina[i].checked){
+					pokusaji=parseInt(tezina[i].value);
+				}
+			}
+			document.getElementById('sporedni').className="skriven";
+			document.getElementById('glavni').className="";
+			document.getElementById('konzola').innerHTML="Преостали број покушаја: "+pokusaji;
+		}
+
+		function dodajSimbol(sim){
+			if(kraj){return;}
+			izabranaKomb[brojacDodavanja]=sim;
+			brojacDodavanja++;
+			if(brojacDodavanja>3){brojacDodavanja=0;}
+			document.getElementById('tPrikaz').innerHTML="";
+			for(var i=0; i<izabranaKomb.length; i++){
+				if(izabranaKomb[i]==7){
+					document.getElementById('tPrikaz').innerHTML+="<p class='okvir'></p>";
+					continue;
+				}
+				document.getElementById('tPrikaz').innerHTML+="<p class='okvir'>"+prikaz[izabranaKomb[i]]+"</p>";
+			}
+			var okviri=document.getElementsByClassName('okvir');
+			for(var i=0; i<okviri.length; i++){
+				if(i==brojacDodavanja){
+					okviri[i].className="okvir selekt";
+				}
+			}
+		}
+
+		function proveriKomb(){
+			if(kraj){return;}
+			for(var i=0; i<izabranaKomb.length; i++){
+				if(izabranaKomb[i]==7){return;}
+			}
+			brojacDodavanja=0;
+			var tempI=izabranaKomb.slice(0);
+			var tempR=randomKomb.slice(0);
+			var brojCrvenih=0;
+			var brojZutih=0;
+
+			for(var i=0; i<tempI.length; i++){
+				if(tempI[i]==tempR[i]){
+					brojCrvenih++;
+					tempI[i]=7;
+					tempR[i]=7;
+				}
+			}
+			for(var i=0; i<tempI.length; i++){
+				if(tempI[i]==7){continue;}
+				for(var j=0; j<tempR.length; j++){
+					if(tempI[i]==tempR[j]){
+						brojZutih++;
+						tempI[i]=7;
+						tempR[j]=7;
+						break;
+					}
+				}
+			}
+			var brojPraznih=4 - brojCrvenih - brojZutih;
+
+			var zajednickiDiv=document.createElement('div');
+			var rezultatP=document.createElement('p');
+			for(var i=0; i<izabranaKomb.length; i++){
+				rezultatP.innerHTML+=prikaz[izabranaKomb[i]]+" ";
+			}
+			zajednickiDiv.appendChild(rezultatP);
+
+			rezultatP=document.createElement('p');
+			for(var i=0; i<brojCrvenih; i++){
+				var krugDiv=document.createElement('div');
+				krugDiv.className="crveni";
+				rezultatP.appendChild(krugDiv);
+			}
+			for(var i=0; i<brojZutih; i++){
+				var krugDiv=document.createElement('div');
+				krugDiv.className="zuti";
+				rezultatP.appendChild(krugDiv);
+			}
+			for(var i=0; i<brojPraznih; i++){
+				var krugDiv=document.createElement('div');
+				krugDiv.className="sivi";
+				rezultatP.appendChild(krugDiv);
+			}
+			zajednickiDiv.appendChild(rezultatP);
+			document.getElementById('istorija').appendChild(zajednickiDiv);
+
+			//za restart unesene kombinacije
+			document.getElementById('tPrikaz').innerHTML="";
+			for(var i=0; i<izabranaKomb.length; i++){
+				izabranaKomb[i]=7;
+				document.getElementById('tPrikaz').innerHTML+="<p class='okvir'></p>";
+			}
+			var okviri=document.getElementsByClassName('okvir');
+			okviri[0].className="okvir selekt";
+
+			pokusaji--;
+			document.getElementById('konzola').innerHTML="Преостали број покушаја: "+pokusaji+"<br>";
+			if(brojCrvenih==4){
+				kraj=true;
+				document.getElementById('konzola').innerHTML+="ПОБЕДА!<br>Рестартуј <a href='igraPogodi.html'>овде</a>";
+				return;
+			}
+			if(pokusaji<1){
+				kraj=true;
+				document.getElementById('konzola').innerHTML+="Изгубио си!<br>";
+				for(var i=0; i<randomKomb.length; i++){
+					document.getElementById('konzola').innerHTML+=prikaz[randomKomb[i]];
+				}
+				document.getElementById('konzola').innerHTML+="<br>Рестартуј <a href='igraPogodi.html'>овде</a>";
+			}
+		}
+	</script>
+</body>
+
+</html>
